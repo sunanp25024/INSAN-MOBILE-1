@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="180" height="180" viewBox="0 0 180 180">
+  <rect width="180" height="180" fill="#4f46e5" rx="45" ry="45"/>
+  <text x="90" y="105" font-size="70" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-weight="bold">IN</text>
+  <path d="M45 125 L135 125" stroke="white" stroke-width="8" stroke-linecap="round"/>
+  <path d="M55 140 L125 140" stroke="white" stroke-width="6" stroke-linecap="round"/>
+</svg>

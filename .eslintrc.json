@@ -1,0 +1,16 @@
+{
+  "extends": [
+    "next/core-web-vitals",
+    "next/typescript"
+  ],
+  "rules": {
+    "no-console": "off",
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-unused-vars": "warn"
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "es6": true
+  }
+}
