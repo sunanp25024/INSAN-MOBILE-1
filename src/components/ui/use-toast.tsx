@@ -1,11 +1,10 @@
 // Adapted from shadcn/ui toast component
 // https://ui.shadcn.com/docs/components/toast
+"use client"
 
+import * as React from "react"
 import { Toast, ToastActionElement, ToastProps } from "@/components/ui/toast"
-import {
-  useToast as useToastOriginal,
-  type ToastOptions as ToastOptionsOriginal,
-} from "@/components/ui/toaster"
+import { useToast as useToastHook } from "@/hooks/use-toast"
 
 type ToasterToast = ToastProps & {
   id: string
@@ -17,18 +16,11 @@ type ToasterToast = ToastProps & {
 
 type ToastOptions = Omit<ToasterToast, "id">
 
-const useToast = () => {
-  const { toast, dismiss, toasts } = useToastOriginal()
+const useToast = useToastHook
 
-  function addToast(options: ToastOptions) {
-    return toast(options)
-  }
-
-  return {
-    toast: addToast,
-    dismiss,
-    toasts,
-  }
+const toast = (options: ToastOptions) => {
+  const { toast } = useToast()
+  return toast(options)
 }
 
-export { useToast, type ToastOptions, type ToasterToast }
+export { useToast, toast, type ToastOptions, type ToasterToast }

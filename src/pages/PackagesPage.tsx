@@ -14,11 +14,19 @@ import { PackageModel, Package } from '@/models/package.model';
 import { UserModel } from '@/models/user.model';
 import { LocationModel } from '@/models/location.model';
 import { Plus, Search, Filter, RefreshCw, Eye, Edit, Trash, Truck, CheckCircle, XCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
+
+// Extended Package type with additional properties needed in this component
+type ExtendedPackage = Package & {
+  tracking_number: string;
+  recipient_address: string;
+};
 
 export default function PackagesPage() {
   const { user } = useAuth();
-  const [packages, setPackages] = useState<Package[]>([]);
-  const [filteredPackages, setFilteredPackages] = useState<Package[]>([]);
+  const { toast } = useToast();
+  const [packages, setPackages] = useState<ExtendedPackage[]>([]);
+  const [filteredPackages, setFilteredPackages] = useState<ExtendedPackage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -39,8 +47,16 @@ export default function PackagesPage() {
               // Admin, MasterAdmin, dan PIC melihat semua paket
               packageData = await PackageModel.getAll();
             }
-            setPackages(packageData);
-            setFilteredPackages(packageData);
+            
+            // Map Package objects to ExtendedPackage objects with default values for missing properties
+            const extendedPackages: ExtendedPackage[] = packageData.map(pkg => ({
+              ...pkg,
+              tracking_number: pkg.id, // Using id as tracking number as a fallback
+              recipient_address: 'Alamat tidak tersedia' // Default value for recipient_address
+            }));
+            
+            setPackages(extendedPackages);
+            setFilteredPackages(extendedPackages);
           } catch (error) {
             console.error('Error fetching package data:', error);
             toast({
@@ -76,7 +92,7 @@ export default function PackagesPage() {
       filtered = filtered.filter(
         (pkg) =>
           pkg.tracking_number.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          pkg.recipient_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          (pkg.recipient_name?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false) ||
           pkg.recipient_address.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
@@ -99,7 +115,7 @@ export default function PackagesPage() {
       case 'in_transit':
         return <Badge variant="default">Dalam Pengiriman</Badge>;
       case 'delivered':
-        return <Badge variant="success" className="bg-green-500 text-white">Terkirim</Badge>;
+        return <Badge variant="default" className="bg-green-500 text-white">Terkirim</Badge>;
       case 'failed':
         return <Badge variant="destructive">Gagal</Badge>;
       default:
@@ -155,6 +171,7 @@ export default function PackagesPage() {
                   <Label htmlFor="status">Status</Label>
                   <select
                     id="status"
+                    aria-label="Filter by status"
                     className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
@@ -251,7 +268,7 @@ export default function PackagesPage() {
                                   </Button>
                                 </>
                               )}
-                              {pkg.status === 'processing' && (
+                              {pkg.status === 'process' && (
                                 <Button variant="outline" size="sm">
                                   <Truck className="mr-2 h-4 w-4" /> Ambil
                                 </Button>

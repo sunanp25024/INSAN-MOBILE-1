@@ -1,9 +1,40 @@
 import { supabase } from '@/lib/supabase';
 import type { Database } from '@/types/supabase';
 
-export type Location = Database['public']['Tables']['locations']['Row'];
-export type LocationInsert = Database['public']['Tables']['locations']['Insert'];
-export type LocationUpdate = Database['public']['Tables']['locations']['Update'];
+// Base location type from database
+type BaseLocation = Database['public']['Tables']['locations']['Row'];
+
+// Extended location type with UI-specific properties
+export interface Location extends BaseLocation {
+  address: string;
+  city: string;
+  province: string;
+  postal_code: string;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+
+// Insert type with UI-specific properties
+type BaseLocationInsert = Database['public']['Tables']['locations']['Insert'];
+export interface LocationInsert extends BaseLocationInsert {
+  address?: string;
+  city?: string;
+  province?: string;
+  postal_code?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+}
+
+// Update type with UI-specific properties
+type BaseLocationUpdate = Database['public']['Tables']['locations']['Update'];
+export interface LocationUpdate extends BaseLocationUpdate {
+  address?: string;
+  city?: string;
+  province?: string;
+  postal_code?: string;
+  latitude?: number | null;
+  longitude?: number | null;
+}
 
 export class LocationModel {
   /**
@@ -19,7 +50,17 @@ export class LocationModel {
       throw error;
     }
 
-    return data || [];
+    // Add UI-specific properties with default values
+    // In a real implementation, these would come from a metadata table or JSON field
+    return (data || []).map(location => ({
+      ...location,
+      address: '',  // Default empty values for UI fields
+      city: '',
+      province: '',
+      postal_code: '',
+      latitude: null,
+      longitude: null
+    }));
   }
 
   /**
@@ -37,7 +78,18 @@ export class LocationModel {
       throw error;
     }
 
-    return data;
+    if (!data) return null;
+    
+    // Add UI-specific properties with default values
+    return {
+      ...data,
+      address: '',
+      city: '',
+      province: '',
+      postal_code: '',
+      latitude: null,
+      longitude: null
+    };
   }
 
   /**
@@ -54,16 +106,34 @@ export class LocationModel {
       throw error;
     }
 
-    return data || [];
+    // Add UI-specific properties with default values
+    return (data || []).map(location => ({
+      ...location,
+      address: '',
+      city: '',
+      province: '',
+      postal_code: '',
+      latitude: null,
+      longitude: null
+    }));
   }
 
   /**
    * Membuat lokasi baru
    */
   static async create(location: LocationInsert): Promise<Location> {
+    // Extract database fields from the location object
+    const { address, city, province, postal_code, latitude, longitude, ...dbLocation } = location;
+    
+    // Ensure required fields are present
+    if (!dbLocation.name || !dbLocation.type) {
+      throw new Error('Location name and type are required');
+    }
+    
+    // Insert only the database fields
     const { data, error } = await supabase
       .from('locations')
-      .insert(location)
+      .insert(dbLocation)
       .select()
       .single();
 
@@ -72,16 +142,29 @@ export class LocationModel {
       throw error;
     }
 
-    return data;
+    // Return the location with UI-specific properties
+    return {
+      ...data,
+      address: address || '',
+      city: city || '',
+      province: province || '',
+      postal_code: postal_code || '',
+      latitude: latitude || null,
+      longitude: longitude || null
+    };
   }
 
   /**
    * Memperbarui lokasi
    */
   static async update(id: string, updates: LocationUpdate): Promise<Location> {
+    // Extract database fields from the updates object
+    const { address, city, province, postal_code, latitude, longitude, ...dbUpdates } = updates;
+    
+    // Update only the database fields
     const { data, error } = await supabase
       .from('locations')
-      .update(updates)
+      .update(dbUpdates)
       .eq('id', id)
       .select()
       .single();
@@ -91,7 +174,16 @@ export class LocationModel {
       throw error;
     }
 
-    return data;
+    // Return the location with UI-specific properties
+    return {
+      ...data,
+      address: address || '',
+      city: city || '',
+      province: province || '',
+      postal_code: postal_code || '',
+      latitude: latitude || null,
+      longitude: longitude || null
+    };
   }
 
   /**
@@ -111,18 +203,28 @@ export class LocationModel {
 
   /**
    * Mencari lokasi berdasarkan nama atau alamat
+   * Note: In the actual database, we can only search by name since address is not in the schema
    */
   static async search(query: string): Promise<Location[]> {
     const { data, error } = await supabase
       .from('locations')
       .select('*')
-      .or(`name.ilike.%${query}%,address.ilike.%${query}%`);
+      .ilike('name', `%${query}%`);
 
     if (error) {
       console.error(`Error searching locations with query ${query}:`, error);
       throw error;
     }
 
-    return data || [];
+    // Add UI-specific properties with default values
+    return (data || []).map(location => ({
+      ...location,
+      address: '',
+      city: '',
+      province: '',
+      postal_code: '',
+      latitude: null,
+      longitude: null
+    }));
   }
 }

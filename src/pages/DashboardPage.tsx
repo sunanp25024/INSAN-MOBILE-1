@@ -86,7 +86,7 @@ const DashboardPage: React.FC = () => {
 
           setStats({
             totalPackages: packages.length,
-            pendingPackages: packages.filter(p => p.status === 'pending').length,
+            pendingPackages: packages.filter(p => p.status === 'process').length,
             deliveredPackages: packages.filter(p => p.status === 'delivered').length,
             totalUsers: users.length,
             totalLocations: locations.length,
@@ -98,8 +98,8 @@ const DashboardPage: React.FC = () => {
           // Courier can only see their own packages
           const { data: packages, error: packagesError } = await supabase
             .from('packages')
-            .select('status, updated_at')
-            .eq('courier_id', user.id);
+            .select('status, last_update_time')
+            .eq('assigned_courier_id', user.id);
 
           if (packagesError) throw packagesError;
 
@@ -109,13 +109,13 @@ const DashboardPage: React.FC = () => {
 
           setStats({
             totalPackages: packageList.length,
-            pendingPackages: packageList.filter(p => p.status === 'pending').length,
+            pendingPackages: packageList.filter(p => p.status === 'process').length,
             deliveredPackages: packageList.filter(p => p.status === 'delivered').length,
             todayDeliveries: packageList.filter(p => 
-              p.status === 'delivered' && p.updated_at >= today
+              p.status === 'delivered' && p.last_update_time >= today
             ).length,
             monthlyDeliveries: packageList.filter(p => 
-              p.status === 'delivered' && p.updated_at >= monthStart
+              p.status === 'delivered' && p.last_update_time >= monthStart
             ).length,
             totalUsers: 0,
             totalLocations: 0,
@@ -125,8 +125,8 @@ const DashboardPage: React.FC = () => {
           // PIC can see packages for their location
           const { data: packages, error: packagesError } = await supabase
             .from('packages')
-            .select('status, updated_at')
-            .eq('location_id', user.user_metadata?.location_id);
+            .select('status, last_update_time')
+            .eq('hub_location', user.user_metadata?.location_id);
 
           if (packagesError) throw packagesError;
 
@@ -136,13 +136,13 @@ const DashboardPage: React.FC = () => {
 
           setStats({
             totalPackages: packageList.length,
-            pendingPackages: packageList.filter(p => p.status === 'pending').length,
+            pendingPackages: packageList.filter(p => p.status === 'process').length,
             deliveredPackages: packageList.filter(p => p.status === 'delivered').length,
             todayDeliveries: packageList.filter(p => 
-              p.status === 'delivered' && p.updated_at >= today
+              p.status === 'delivered' && p.last_update_time >= today
             ).length,
             monthlyDeliveries: packageList.filter(p => 
-              p.status === 'delivered' && p.updated_at >= monthStart
+              p.status === 'delivered' && p.last_update_time >= monthStart
             ).length,
             totalUsers: 0,
             totalLocations: 0,

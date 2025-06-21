@@ -5,6 +5,19 @@
 
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 
+// Define store names as a union type for type safety
+type StoreNames = 'packages' | 'delivery_activities' | 'attendance_records' | 'sync_queue';
+
+// Define a type for sync queue items
+type SyncQueueItem = {
+  id: string;
+  table: string;
+  action: 'create' | 'update' | 'delete';
+  data: any;
+  timestamp: number;
+  synced: boolean;
+};
+
 // Definisi skema database IndexedDB
 interface AppDB extends DBSchema {
   packages: {
@@ -24,14 +37,7 @@ interface AppDB extends DBSchema {
   };
   sync_queue: {
     key: string;
-    value: {
-      id: string;
-      table: string;
-      action: 'create' | 'update' | 'delete';
-      data: any;
-      timestamp: number;
-      synced: boolean;
-    };
+    value: SyncQueueItem;
     indexes: { 'by-synced': boolean };
   };
 }
@@ -83,7 +89,7 @@ export async function initDB(): Promise<IDBPDatabase<AppDB>> {
 /**
  * Menyimpan data ke cache lokal
  */
-export async function saveToCache<T>(storeName: keyof AppDB, data: T | T[]): Promise<void> {
+export async function saveToCache<T>(storeName: StoreNames, data: T | T[]): Promise<void> {
   const db = await initDB();
   const tx = db.transaction(storeName, 'readwrite');
   const store = tx.objectStore(storeName);
@@ -103,7 +109,7 @@ export async function saveToCache<T>(storeName: keyof AppDB, data: T | T[]): Pro
  * Mengambil data dari cache lokal
  */
 export async function getFromCache<T>(
-  storeName: keyof AppDB,
+  storeName: StoreNames,
   id?: string
 ): Promise<T | T[] | null> {
   const db = await initDB();
@@ -118,7 +124,7 @@ export async function getFromCache<T>(
  * Mengambil data dari cache berdasarkan index
  */
 export async function getFromCacheByIndex<T>(
-  storeName: keyof AppDB,
+  storeName: StoreNames,
   indexName: string,
   value: any
 ): Promise<T[]> {
@@ -132,7 +138,7 @@ export async function getFromCacheByIndex<T>(
  * Menghapus data dari cache lokal
  */
 export async function removeFromCache(
-  storeName: keyof AppDB,
+  storeName: StoreNames,
   id: string
 ): Promise<void> {
   const db = await initDB();
@@ -148,7 +154,7 @@ export async function addToSyncQueue(
   data: any
 ): Promise<void> {
   const db = await initDB();
-  const syncItem = {
+  const syncItem: SyncQueueItem = {
     id: `${table}_${data.id}_${Date.now()}`,
     table,
     action,
@@ -157,7 +163,8 @@ export async function addToSyncQueue(
     synced: false,
   };
 
-  await db.add('sync_queue', syncItem);
+  const storeName: StoreNames = 'sync_queue';
+  await db.add(storeName, syncItem);
 }
 
 /**
@@ -170,7 +177,8 @@ export async function syncWithServer(supabase: any): Promise<void> {
   }
 
   const db = await initDB();
-  const unsyncedItems = await db.getAllFromIndex('sync_queue', 'by-synced', false);
+  const storeName: StoreNames = 'sync_queue';
+  const unsyncedItems = await db.getAllFromIndex(storeName, 'by-synced', false);
 
   for (const item of unsyncedItems) {
     try {
@@ -197,7 +205,8 @@ export async function syncWithServer(supabase: any): Promise<void> {
       }
 
       // Tandai sebagai sudah disinkronkan
-      await db.put('sync_queue', { ...item, synced: true });
+      const storeName: StoreNames = 'sync_queue';
+      await db.put(storeName, { ...item, synced: true });
     } catch (error) {
       console.error(`Error saat sinkronisasi ${item.action} untuk ${item.table}:`, error);
     }

@@ -1,6 +1,7 @@
 
 "use client";
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
+import styles from './page.module.css';
 import { supabase, subscribeToTable, unsubscribeFromChannel, fetchDataFromTable } from '@/lib/supabase';
 import type { RealtimeChannel } from '@supabase/supabase-js';
 import type { Database } from '@/types/supabase';
@@ -1678,7 +1679,7 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                       <video ref={videoRef} className="w-full aspect-video rounded-md bg-muted" autoPlay muted playsInline />
-                      <canvas ref={photoCanvasRef} style={{display: 'none'}} />
+                      <canvas ref={photoCanvasRef} className={styles.hiddenCanvas} />
                       {hasCameraPermission === false && (
                         <Alert variant="destructive" className="mt-2">
                           <AlertTitle>Akses Kamera Dibutuhkan</AlertTitle>
@@ -1784,7 +1785,7 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent className="space-y-4">
                       <video ref={videoRef} className="w-full aspect-video rounded-md bg-muted" autoPlay muted playsInline />
-                      <canvas ref={photoCanvasRef} style={{display: 'none'}} />
+                      <canvas ref={photoCanvasRef} className={styles.hiddenCanvas} />
                       {hasCameraPermission === false && (
                         <Alert variant="destructive" className="mt-2">
                           <AlertTitle>Akses Kamera Dibutuhkan</AlertTitle>
@@ -1819,7 +1820,7 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                       <video ref={videoRef} className="w-full aspect-video rounded-md bg-muted" autoPlay muted playsInline />
-                      <canvas ref={photoCanvasRef} style={{display: 'none'}} />
+                      <canvas ref={photoCanvasRef} className={styles.hiddenCanvas} />
                        {hasCameraPermission === false && (
                         <Alert variant="destructive" className="mt-2">
                           <AlertTitle>Akses Kamera Dibutuhkan</AlertTitle>

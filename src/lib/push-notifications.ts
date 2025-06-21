@@ -269,7 +269,8 @@ export async function sendPushNotification(payload: PushNotificationPayload, use
               badge: payload.badge || '/icons/icon-72x72.png',
               tag: payload.tag || `insan-mobile-notification-${Date.now()}`,
               requireInteraction: payload.requireInteraction || true,
-              renotify: payload.renotify || true,
+              // Use type assertion to handle non-standard property
+              ...(payload.renotify !== undefined ? { renotify: payload.renotify } as any : {}),
               silent: payload.silent || false,
               data: {
                 ...payload.data,

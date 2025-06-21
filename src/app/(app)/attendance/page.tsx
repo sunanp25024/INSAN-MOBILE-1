@@ -216,7 +216,8 @@ export default function AttendancePage() {
           user_id: currentUser.id,
           date: now.toISOString().split('T')[0],
           check_in_time: now.toISOString(),
-          location: currentUser.workLocation
+          location: currentUser.workLocation,
+          status: checkInStatus
         })
         .select()
         .single();

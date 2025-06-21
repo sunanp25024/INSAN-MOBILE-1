@@ -12,11 +12,18 @@ import { ProtectedRoute } from '@/components/auth/protected-route';
 import { useAuth } from '@/hooks/useAuth';
 import { UserModel, User } from '@/models/user.model';
 import { Plus, Search, Filter, RefreshCw, Eye, Edit, Trash, Lock } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
+
+// Extend the User type to include phone_number
+interface ExtendedUser extends User {
+  phone_number?: string | null;
+}
 
 function UsersPageContent() {
   const { user: currentUser } = useAuth();
-  const [users, setUsers] = useState<User[]>([]);
-  const [filteredUsers, setFilteredUsers] = useState<User[]>([]);
+  const { toast } = useToast();
+  const [users, setUsers] = useState<ExtendedUser[]>([]);
+  const [filteredUsers, setFilteredUsers] = useState<ExtendedUser[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [roleFilter, setRoleFilter] = useState<string>('all');
@@ -148,6 +155,7 @@ function UsersPageContent() {
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   value={roleFilter}
                   onChange={(e) => setRoleFilter(e.target.value)}
+                  aria-label="Filter Peran Pengguna"
                 >
                   <option value="all">Semua Peran</option>
                   {currentUser?.role === 'MasterAdmin' && (

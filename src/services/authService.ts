@@ -12,6 +12,11 @@ export interface AuthUser {
   joinDate?: string;
   token?: string;
   tokenExpiry?: number;
+  user_metadata?: {
+    role?: string;
+    location_id?: string;
+  };
+  last_sign_in_at?: string;
 }
 
 export class AuthService {

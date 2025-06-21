@@ -3,18 +3,17 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import NativeFeatureInitializer from '@/components/native-feature-initializer';
 import PerformanceMonitor from '@/components/performance-monitor';
-import type { Metadata, Viewport } from 'next';
 
 export const metadata: Metadata = {
-  title: 'INSAN MOBILE',
+  title: 'PARA KURIR',
   description: 'Aplikasi Mobile untuk Manajemen Pengiriman',
   manifest: '/manifest.json',
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'INSAN MOBILE',
+    title: 'PARA KURIR',
   },
-  applicationName: 'INSAN MOBILE',
+  applicationName: 'PARA KURIR',
   formatDetection: {
     telephone: true,
   },
@@ -25,7 +24,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: '#4f46e5',
+  themeColor: '#ffffff',
 };
 
 export default function RootLayout({
@@ -36,6 +35,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        {/* Apple touch icon - placed at the beginning of head as recommended */}
+        <link rel="apple-touch-icon" sizes="180x180" href="/web-app-manifest-192x192.png" />
+        
         {/* Preconnect to external domains */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
@@ -50,14 +52,15 @@ export default function RootLayout({
         <link rel="preload" href="/globals.css" as="style" />
         
         {/* Optimized icon references with correct extensions */}
-        <link rel="apple-touch-icon" sizes="180x180" href="/icons/apple-touch-icon.svg" />
-        <link rel="icon" type="image/svg+xml" sizes="32x32" href="/icons/favicon-32x32.svg" />
-        <link rel="icon" type="image/svg+xml" sizes="16x16" href="/icons/favicon-16x16.svg" />
-        <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#4f46e5" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/icons/favicon-32x32.svg" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/icons/favicon-16x16.svg" />
+        <link rel="mask-icon" href="/icons/safari-pinned-tab.svg" color="#ffffff" />
         
         {/* PWA and theme configuration */}
-        <meta name="msapplication-TileColor" content="#4f46e5" />
-        <meta name="theme-color" content="#4f46e5" />
+        <meta name="msapplication-TileColor" content="#ffffff" />
+        {/* Theme color with color-scheme as alternative for better cross-browser support */}
+        <meta name="theme-color" content="#ffffff" />
+        <meta name="color-scheme" content="light" />
         
         {/* Preload critical scripts */}
         <link rel="preload" href="/register-sw.js" as="script" />

@@ -1,8 +1,8 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'com.insanmobile.app',
-  appName: 'INSAN MOBILE',
+  appId: 'com.parakurir.app',
+  appName: 'PARA KURIR',
   webDir: 'out',
   server: {
     androidScheme: 'https',
@@ -13,7 +13,7 @@ const config: CapacitorConfig = {
   plugins: {
     SplashScreen: {
       launchShowDuration: 2000,
-      backgroundColor: '#4f46e5',
+      backgroundColor: '#ffffff',
       androidSplashResourceName: 'splash',
       splashFullScreen: true,
       splashImmersive: true,

@@ -28,10 +28,16 @@ function LocationsContent() {
     city: '',
     province: '',
     postal_code: '',
-    type: 'warehouse',
+    type: 'hub', // Changed from 'warehouse' to 'hub' to match database schema
+    parent_id: null as string | null, // Added for hierarchical structure
     latitude: '',
     longitude: '',
   });
+  
+  // State for parent location options
+  const [wilayahOptions, setWilayahOptions] = useState<Location[]>([]);
+  const [areaOptions, setAreaOptions] = useState<Location[]>([]);
+  const [showParentSelect, setShowParentSelect] = useState(false);
 
   // Fungsi untuk mendapatkan data lokasi
   const fetchLocations = async () => {
@@ -41,6 +47,10 @@ function LocationsContent() {
         const locationData = await LocationModel.getAll();
         setLocations(locationData);
         setFilteredLocations(locationData);
+        
+        // Filter wilayah and area options for parent selection
+        setWilayahOptions(locationData.filter(loc => loc.type === 'wilayah'));
+        setAreaOptions(locationData.filter(loc => loc.type === 'area'));
       } catch (error) {
         console.error('Error fetching location data:', error);
         toast({
@@ -100,7 +110,8 @@ function LocationsContent() {
           city: newLocation.city,
           province: newLocation.province,
           postal_code: newLocation.postal_code,
-          type: newLocation.type,
+          type: newLocation.type as 'wilayah' | 'area' | 'hub', // Ensure type matches database schema
+          parent_id: newLocation.parent_id, // Include parent_id for hierarchical structure
           latitude: newLocation.latitude ? parseFloat(newLocation.latitude) : null,
           longitude: newLocation.longitude ? parseFloat(newLocation.longitude) : null,
         });
@@ -112,7 +123,8 @@ function LocationsContent() {
           city: '',
           province: '',
           postal_code: '',
-          type: 'warehouse',
+          type: 'hub',
+          parent_id: null,
           latitude: '',
           longitude: '',
         });
@@ -147,12 +159,12 @@ function LocationsContent() {
   // Fungsi untuk mendapatkan badge tipe lokasi
   const getLocationTypeBadge = (type: string) => {
     switch (type) {
-      case 'warehouse':
-        return <Badge className="bg-blue-500 text-white">Gudang</Badge>;
-      case 'drop_point':
-        return <Badge className="bg-green-500 text-white">Drop Point</Badge>;
-      case 'office':
-        return <Badge className="bg-purple-500 text-white">Kantor</Badge>;
+      case 'wilayah':
+        return <Badge className="bg-blue-500 text-white">Wilayah</Badge>;
+      case 'area':
+        return <Badge className="bg-green-500 text-white">Area</Badge>;
+      case 'hub':
+        return <Badge className="bg-purple-500 text-white">Hub</Badge>;
       default:
         return <Badge variant="outline">{type}</Badge>;
     }
@@ -195,13 +207,40 @@ function LocationsContent() {
                   id="type"
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   value={newLocation.type}
-                  onChange={(e) => setNewLocation({ ...newLocation, type: e.target.value })}
+                  aria-label="Tipe Lokasi"
+                  onChange={(e) => {
+                    const selectedType = e.target.value as 'wilayah' | 'area' | 'hub';
+                    setNewLocation({ ...newLocation, type: selectedType, parent_id: null });
+                    setShowParentSelect(selectedType === 'area' || selectedType === 'hub');
+                  }}
                 >
-                  <option value="warehouse">Gudang</option>
-                  <option value="drop_point">Drop Point</option>
-                  <option value="office">Kantor</option>
+                  <option value="wilayah">Wilayah</option>
+                  <option value="area">Area</option>
+                  <option value="hub">Hub</option>
                 </select>
               </div>
+              {showParentSelect && (
+                <div className="space-y-2">
+                  <Label htmlFor="parent_id">
+                    {newLocation.type === 'area' ? 'Wilayah Induk' : 'Area Induk'}
+                  </Label>
+                  <select
+                    id="parent_id"
+                    className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                    value={newLocation.parent_id || ''}
+                    aria-label={newLocation.type === 'area' ? 'Wilayah Induk' : 'Area Induk'}
+                    onChange={(e) => setNewLocation({ ...newLocation, parent_id: e.target.value || null })}
+                  >
+                    <option value="">Pilih {newLocation.type === 'area' ? 'Wilayah' : 'Area'}</option>
+                    {newLocation.type === 'area' && wilayahOptions.map(wilayah => (
+                      <option key={wilayah.id} value={wilayah.id}>{wilayah.name}</option>
+                    ))}
+                    {newLocation.type === 'hub' && areaOptions.map(area => (
+                      <option key={area.id} value={area.id}>{area.name}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
               <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="address">Alamat</Label>
                 <Input
@@ -301,12 +340,13 @@ function LocationsContent() {
                   id="type"
                   className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
                   value={typeFilter}
+                  aria-label="Filter Tipe Lokasi"
                   onChange={(e) => setTypeFilter(e.target.value)}
                 >
                   <option value="all">Semua Tipe</option>
-                  <option value="warehouse">Gudang</option>
-                  <option value="drop_point">Drop Point</option>
-                  <option value="office">Kantor</option>
+                  <option value="wilayah">Wilayah</option>
+                  <option value="area">Area</option>
+                  <option value="hub">Hub</option>
                 </select>
               </div>
             </div>

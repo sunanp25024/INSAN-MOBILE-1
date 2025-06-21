@@ -107,7 +107,7 @@ export async function uploadFileToStorage(bucket: string, path: string, file: Fi
 }
 
 // Fungsi untuk mendengarkan perubahan realtime pada tabel tertentu
-export function subscribeToTable(
+export function subscribeToTableChanges(
   tableName: string,
   callback: (payload: any) => void,
   event: 'INSERT' | 'UPDATE' | 'DELETE' | '*' = '*'
@@ -115,9 +115,9 @@ export function subscribeToTable(
   return supabase
     .channel(`public:${tableName}`)
     .on(
-      'postgres_changes',
+      'postgres_changes' as any,
       { event, schema: 'public', table: tableName },
-      (payload) => callback(payload)
+      (payload: any) => callback(payload)
     )
     .subscribe();
 }
@@ -130,8 +130,11 @@ export function unsubscribeFromChannel(channel: RealtimeChannel): void {
 }
 
 // Fungsi untuk mengambil data dari tabel dengan filter opsional
-export async function fetchDataFromTable(tableName: string, filters?: Record<string, any>) {
-  let query = supabase.from(tableName).select('*');
+export async function fetchDataFromTable<T extends keyof Database['public']['Tables']>(
+  tableName: T, 
+  filters?: Record<string, any>
+) {
+  let query = supabase.from(tableName as any).select('*');
   
   if (filters) {
     Object.entries(filters).forEach(([key, value]) => {

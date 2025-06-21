@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from 'react';
-import { getCLS, getFID, getFCP, getLCP, getTTFB } from 'web-vitals';
+import { onCLS, onFID, onFCP, onLCP, onTTFB } from 'web-vitals';
 
 // Performance monitoring component
 const PerformanceMonitor = () => {
@@ -26,11 +26,11 @@ const PerformanceMonitor = () => {
     };
 
     // Measure Core Web Vitals
-    getCLS(sendToAnalytics);
-    getFID(sendToAnalytics);
-    getFCP(sendToAnalytics);
-    getLCP(sendToAnalytics);
-    getTTFB(sendToAnalytics);
+    onCLS(sendToAnalytics);
+    onFID(sendToAnalytics);
+    onFCP(sendToAnalytics);
+    onLCP(sendToAnalytics);
+    onTTFB(sendToAnalytics);
 
     // Custom performance measurements
     const measureCustomMetrics = () => {
